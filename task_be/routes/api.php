@@ -16,7 +16,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Employees - User
+
 Route::apiResource('employees', UserController::class);
-Route::apiResource('task',TaskController::class);
 Route::post('login', [UserController::class, 'login']);
 Route::get('login', [UserController::class, 'remember']);
+Route::get('employees/status/{id}', [UserController::class, 'change_status']);
+
+// Task 
+
+Route::apiResource('task', TaskController::class);

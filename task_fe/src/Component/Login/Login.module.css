@@ -1,0 +1,34 @@
+.background{
+    background: url(./backgroup.png);
+    height: 100vh;
+    width: 100vw;
+    background-position: center center;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.background>.card{
+    height: calc(90% - 5rem);
+    width: 90%;
+    margin-top: 5rem;
+    max-width: 400px;
+    background: #fff5;
+    border-radius: 1rem;
+    box-shadow: .5rem .5rem 1rem #333;
+}
+.card{
+    display: flex;
+    position: relative;
+    justify-content: center;
+}
+
+.avatar{
+    position: absolute;
+    box-shadow: .5rem .5rem 1rem #333;
+    border-radius: 100%;
+    height: 10rem;
+    width: 10rem;
+    background: white;
+    top: -4rem;
+}

@@ -12,6 +12,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    
     /**
      * The attributes that are mass assignable.
      *
@@ -30,7 +31,10 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'role'
+        'role',
+        'created_at',
+        'updated_at',
+        'remember_token'
     ];
 
     /**
@@ -47,9 +51,19 @@ class User extends Authenticatable
     public static function user()
     {
         if (self::$_user === null) {
-            self::$_user = self::where('remember_token', $_REQUEST['_token'])->first();
+            self::$_user = self::where('remember_token', $_REQUEST['_token']??'')->first()??new User();
         }
-        return self::$_user??(object)[];
+        return self::$_user;
     }
-   
+
+    public static function check(){
+        return self::user()->id !== null;
+    }
+
+    public function get_task()
+    {
+        $task = Task::where('task_for', $this->id)->get();
+        return $task;
+    }
+    
 }

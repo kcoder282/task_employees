@@ -19,8 +19,8 @@ class CreateTasksTable extends Migration
             $table->string('task_content');
             $table->date('start');
             $table->date('target');
-            $table->dateTime('completed');
-            $table->enum('status', ['new', 'Processing', 'complete'])->default('new');
+            $table->date('completed')->nullable();  
+            $table->enum('status', ['new', 'received', 'processing', 'complete'])->default('new');
             $table->foreignId('created_by')->on('users')->cascadeOnDelete();
             $table->foreignId('task_for')->on('users')->cascadeOnDelete();
             $table->timestamps();

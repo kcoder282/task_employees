@@ -18,9 +18,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        if (User::user()->role === 'admin') {
-            return User::all();
-        } else return ['status' => 'error', 'message' => 'Request login role admin'];
+        return User::all();
     }
 
     /**
@@ -56,7 +54,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+        return User::find($id)??(object)[];
     }
 
     /**
@@ -68,7 +66,24 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        if (User::user()->role === 'admin') {
+            if (User::where('email', $request->email)->count() > 1)
+                return ['status' => 'error', 'message' => 'The Email was registered'];
+            $user = User::find($id);
+            if($user){
+                $user->email = $request->email;
+                if($request->password);
+                    $user->password = bcrypt($request->password);
+                $user->full_name = $request->full_name;
+                $user->started_date = $request->started_date;
+                $user->end_date = $request->end_date;
+                $user->sex = $request->sex;
+                $user->date_birth = $request->date_birth;
+                return $user->save() ?
+                    ['status' => 'sucess', 'message' => 'User update successfully'] :
+                    ['status' => 'error', 'message' => 'Server system error'];
+            } else ['status' => 'error', 'message' => 'User does not exist'];
+        } else return ['status' => 'error', 'message' => 'Request login role admin'];
     }
 
     /**
@@ -77,38 +92,66 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        //
+    public function destroy($id){
+        if (User::user()->role === 'admin') {
+            $user = User::find($id);
+            if($user !== null){
+                if($user->id !== User::user()->id)
+                    return $user->delete()?
+                    ['status' => 'sucess', 'message' => 'Removed user successfully'] :
+                    ['status' => 'error', 'message' => 'Server system error'];
+                else return ['status' => 'error', 'message' => 'Cannot remove user is active'];
+            } else return ['status' => 'error', 'message' => 'User does not exist'];
+        }else return ['status' => 'error', 'message' => 'Request login role admin'];
     }
-
-    public function login(Request $request)
-    {
+    public function login(Request $request){
         $user = User::where('email', $request->email)->first();
         if ($user === null) {
             return ['status' => 'error', 'message' => 'Email is not registered'];
         } elseif (!Hash::check($request->password, $user->password)) {
             return ['status' => 'error', 'message' => 'Incorrect password'];
         } elseif( $user->status === 'inactive' ){
+            return ['status' => 'error', 'message' => 'Locked user'];
+        } elseif( $user->status === 'inactive' ){
             return ['status' => 'error', 'message' => 'Account has been locked'];
         } else {
             $user->remember_token = Str::random(100);
             if($user->status === 'new') $user->status = 'active';
-            return $user->save() ? ['status' => 'success', 'data' => $user] : ['status' => 'error', 'message' => 'Server system error'];
+            $result = $user->save();
+            $user->_token = $user->remember_token;
+            return $result ? ['status' => 'success', 'data' => $user] : ['status' => 'error', 'message' => 'Server system error'];
         }
     }
-    public function remember(Request $request)
-    {
+    public function remember(Request $request){
         $user = User::where('remember_token', $request->_token)->first();
         if ($user === null)
             return ['status' => 'error', 'message' => 'Requires login'];
+        elseif ( $user->status === 'inactive' ) return ['status' => 'error', 'message' => 'Locked user'];
         elseif (Carbon::now()->diffInMinutes(new Carbon($user->updated_at)) > 30) {
             $user->remember_token = null;
             $user->save();
             return ['status' => 'error', 'message' => 'Login timeout'];
         } else {
             $user->remember_token = Str::random(100);
-            return $user->save() ? ['status' => 'success', 'data' => $user] : ['status' => 'error', 'message' => 'Server system error'];
+            $result = $user->save();
+            $user->_token = $user->remember_token;
+            return $result ? ['status' => 'success', 'data' => $user ] : ['status' => 'error', 'message' => 'Server system error'];
         }
+    }
+    public function change_status($id){
+        if (User::user()->role === 'admin') {
+            $user = User::find($id);
+            if($user !== null){
+                if($user->id !== User::user()->id){
+                    if($user->status === 'inactive') 
+                        $user->status = 'active';
+                    else 
+                        $user->status = 'inactive'; 
+                    return $user->save()?
+                    ['status' => 'sucess', 'message' => $user->status === 'inactive'? 'User lock':'User unlock'] :
+                    ['status' => 'error', 'message' => 'Server system error'];
+                }else return ['status' => 'error', 'message' => 'Unable to lock active user'];
+            } else return ['status' => 'error', 'message' => 'User does not exist'];
+        }else return ['status' => 'error', 'message' => 'Request login role admin'];
     }
 }
