@@ -2,6 +2,7 @@ import { message } from "antd";
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import Employees from "./Component/Employees/Employees";
 import LayoutMain from "./Component/LayoutMain/LayoutMain";
 import Login from "./Component/Login/Login";
 import { key, url, UserContext } from "./Static";
@@ -20,11 +21,13 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
   return (
     <>
-      <LayoutMain>
+      <LayoutMain setModal={setModal}>
         <Routes>
           <Route path="/" element={"home"} />
+          <Route path="/employees" element={<Employees/>} />
         </Routes>
       </LayoutMain>
       <Login visible={[modal, setModal]} />
