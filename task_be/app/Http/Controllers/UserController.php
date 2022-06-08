@@ -18,7 +18,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::all();
+        if (User::user()->role === 'admin') {
+            return User::all();
+        } else return [];
     }
 
     /**
@@ -36,12 +38,12 @@ class UserController extends Controller
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
             $user->full_name = $request->full_name;
-            $user->started_date = $request->started_date;
-            $user->end_date = $request->end_date;
+            $user->started_date = new Carbon($request->started_date);
+            $user->end_date = new Carbon($request->end_date);
             $user->sex = $request->sex;
-            $user->date_birth = $request->date_birth;
+            $user->date_birth = new Carbon($request->date_birth);
             return $user->save() ?
-                ['status' => 'sucess', 'message' => 'Successful user creation'] :
+                ['status' => 'success', 'message' => 'Successful user creation'] :
                 ['status' => 'error', 'message' => 'Server system error'];
         } else return ['status' => 'error', 'message' => 'Request login role admin'];
     }
@@ -54,7 +56,9 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        return User::find($id)??(object)[];
+        if (User::user()->role === 'admin') {
+            return User::find($id) ?? (object)[];
+        } else return [];
     }
 
     /**
@@ -72,17 +76,18 @@ class UserController extends Controller
             $user = User::find($id);
             if($user){
                 $user->email = $request->email;
-                if($request->password);
-                    $user->password = bcrypt($request->password);
+                if ($request->password){
+                   $user->password = bcrypt($request->password);
+                }
                 $user->full_name = $request->full_name;
-                $user->started_date = $request->started_date;
-                $user->end_date = $request->end_date;
+                $user->started_date = new Carbon($request->started_date);
+                $user->end_date = new Carbon($request->end_date);
                 $user->sex = $request->sex;
-                $user->date_birth = $request->date_birth;
+                $user->date_birth = new Carbon($request->date_birth);
                 return $user->save() ?
-                    ['status' => 'sucess', 'message' => 'User update successfully'] :
+                    ['status' => 'success', 'message' => 'User update successfully'] :
                     ['status' => 'error', 'message' => 'Server system error'];
-            } else ['status' => 'error', 'message' => 'User does not exist'];
+            } else return ['status' => 'error', 'message' => 'User does not exist'];
         } else return ['status' => 'error', 'message' => 'Request login role admin'];
     }
 
@@ -98,11 +103,28 @@ class UserController extends Controller
             if($user !== null){
                 if($user->id !== User::user()->id)
                     return $user->delete()?
-                    ['status' => 'sucess', 'message' => 'Removed user successfully'] :
+                    ['status' => 'success', 'message' => 'Removed user successfully'] :
                     ['status' => 'error', 'message' => 'Server system error'];
                 else return ['status' => 'error', 'message' => 'Cannot remove user is active'];
             } else return ['status' => 'error', 'message' => 'User does not exist'];
         }else return ['status' => 'error', 'message' => 'Request login role admin'];
+    }
+    public function Update_myAuth(Request $request)
+    {
+        if(User::user()){
+            $user = User::user();
+            if($request->password_old){
+                if (Hash::check($request->password_old, $user->password)) {
+                    $user->password = $request->password;
+                } else return ['status' => 'error', 'message' => 'Incorrect password'];
+            }
+            $user->full_name = $request->full_name;
+            $user->started_date = new Carbon($request->started_date);
+            $user->end_date = new Carbon($request->end_date);
+            $user->sex = $request->sex;
+            $user->date_birth = new Carbon($request->date_birth);
+            return $user->save() ? ['status' => 'success', 'message' => 'User update successfully'] : ['status' => 'error', 'message' => 'Server system error'];
+        }else return ['status'=>'error', 'message'=>'Request login'];
     }
     public function login(Request $request){
         $user = User::where('email', $request->email)->first();
@@ -148,10 +170,27 @@ class UserController extends Controller
                     else 
                         $user->status = 'inactive'; 
                     return $user->save()?
-                    ['status' => 'sucess', 'message' => $user->status === 'inactive'? 'User lock':'User unlock'] :
+                    ['status' => 'success', 'message' => $user->status === 'inactive'? 'User lock':'User unlock'] :
                     ['status' => 'error', 'message' => 'Server system error'];
                 }else return ['status' => 'error', 'message' => 'Unable to lock active user'];
             } else return ['status' => 'error', 'message' => 'User does not exist'];
         }else return ['status' => 'error', 'message' => 'Request login role admin'];
+    }
+    public function change_role($id)
+    {
+        if (User::user()->role === 'admin') {
+            $user = User::find($id);
+            if ($user !== null) {
+                if ($user->id !== User::user()->id) {
+                    if ($user->role === 'admin')
+                        $user->role = 'employees';
+                    else
+                        $user->role = 'admin';
+                    return $user->save() ?
+                        ['status' => 'success', 'message' => $user->role === 'admin' ? 'User is Admin' : 'User is Employee'] :
+                        ['status' => 'error', 'message' => 'Server system error'];
+                } else return ['status' => 'error', 'message' => 'Unable to lock active user'];
+            } else return ['status' => 'error', 'message' => 'User does not exist'];
+        } else return ['status' => 'error', 'message' => 'Request login role admin'];
     }
 }

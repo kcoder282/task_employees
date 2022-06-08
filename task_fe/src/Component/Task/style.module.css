@@ -1,0 +1,15 @@
+.range{
+    width: 100px;
+    outline: 1px solid #0002;
+    height: 1rem;
+    overflow: hidden;
+    margin: 0 .25rem;
+}
+.percent{
+    height: 1rem;
+}
+.content_range{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}

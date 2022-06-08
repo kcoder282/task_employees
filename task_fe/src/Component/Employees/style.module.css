@@ -1,0 +1,9 @@
+.Header{
+    padding: 1rem;
+    display: flex;
+    justify-content: end;
+}
+.Header >button{
+    position: sticky;
+    left: 1rem
+}

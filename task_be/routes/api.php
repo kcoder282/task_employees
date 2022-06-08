@@ -22,7 +22,9 @@ Route::apiResource('employees', UserController::class);
 Route::post('login', [UserController::class, 'login']);
 Route::get('login', [UserController::class, 'remember']);
 Route::get('employees/status/{id}', [UserController::class, 'change_status']);
-
+Route::get('employees/role/{id}', [UserController::class, 'change_role']);
+Route::put('update',[UserController::class, 'Update_myAuth']);
 // Task 
 
 Route::apiResource('task', TaskController::class);
+Route::get('task_for', [TaskController::class, 'TaskFor']);

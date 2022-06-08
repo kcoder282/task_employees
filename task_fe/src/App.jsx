@@ -5,7 +5,9 @@ import { Routes, Route } from "react-router-dom";
 import Employees from "./Component/Employees/Employees";
 import LayoutMain from "./Component/LayoutMain/LayoutMain";
 import Login from "./Component/Login/Login";
+import Task from "./Component/Task/Task";
 import { key, url, UserContext } from "./Static";
+import MyTaskCreate from './Component/Task/MyTaskCreate';
 export default function App() {
   const [modal, setModal] = useState(false);
   const {set} = useContext(UserContext);
@@ -26,8 +28,9 @@ export default function App() {
     <>
       <LayoutMain setModal={setModal}>
         <Routes>
-          <Route path="/" element={"home"} />
+          <Route path="/" element={<Task/>} />
           <Route path="/employees" element={<Employees/>} />
+          <Route path="/task_for" element={<MyTaskCreate />} />
         </Routes>
       </LayoutMain>
       <Login visible={[modal, setModal]} />
